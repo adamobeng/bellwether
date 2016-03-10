@@ -22,10 +22,42 @@ prediction.accuracy = predictions[,list(
 
 ## Most frequently correct counties for which there are results in all of the
 ## past 43 elections
-head(
-     prediction.accuracy[n.elections==43][order(-percent.correct)],
-     n=20
-     )
+sink('./out/bellwethers_since_1840.md')
+kable(
+	head(
+	     prediction.accuracy[n.elections>40][order(-percent.correct)],
+	     n=20
+	     )
+)
+sink()
+
+prediction.accuracy[Area=='Webster'& State=='Georgia']
+
+sink('./out/bellwethers_since_1888.md')
+kable(
+      head(
+	predictions[as.numeric(year)>=1888][,list(
+		percent.correct=sum(correct, na.rm=T)/sum(!is.na(correct)),
+		n.correct=sum(correct, na.rm=T),
+		n.elections=sum(!is.na(correct))), by=list(State, Area) 
+	][n.elections==32][order(-percent.correct)],
+	n=20)
+)
+sink()
+
+sink('./out/bellwethers_since_1956.md')
+kable(
+      head(
+	predictions[as.numeric(year)>=1956][,list(
+		percent.correct=sum(correct, na.rm=T)/sum(!is.na(correct)),
+		n.correct=sum(correct, na.rm=T),
+		n.elections=sum(!is.na(correct))), by=list(State, Area) 
+	][n.elections==15][order(-percent.correct)],
+	n=20)
+)
+sink()
+
+
 
 
 ## Streaks
