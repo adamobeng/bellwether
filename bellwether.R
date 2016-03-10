@@ -1,4 +1,5 @@
 library(data.table)
+library(ggplot2)
 
 all.results = data.table()
 source('./ICPSR_8611.R')
@@ -50,3 +51,31 @@ all.streakers[,list(sum(current.correct),length(current.correct),sum(current.cor
 
 ## Proportion of all streaks which continued in the next election
 all.streakers[,list(sum(current.correct,na.rm=T),length(current.correct),sum(current.correct, na.rm=T)/length(current.correct))]
+
+
+## Streaks graph
+
+most_recent_streak <- function(x) {
+	rles <- rle(x)
+	tail(rles[[1]], 1)
+}
+
+streak.lengths = data.table()
+for (end_year in seq(as.numeric(min(predictions$year)), as.numeric(max(predictions$year)),4))
+{
+	streak.lengths = rbind(streak.lengths,
+	predictions[order(year)][year < end_year, 
+	 list(length=most_recent_streak(county.winning.party==winning.party), year=end_year),
+	 by=list(State,Area)
+	]
+	)
+}
+
+top.streaks = unique(streak.lengths[length>15][,list(State, Area, color=paste0(Area, ', ', State))])
+streak.lengths = merge(streak.lengths, top.streaks, by=c('State', 'Area'), all.x= T)
+
+theme_set(theme_bw())
+ggplot(streak.lengths[!is.na(color)]) + geom_line(aes(x=year, y=length, group=paste(State, Area), color=color)) + 
+	scale_x_continuous(breaks=seq(1840,2012, 4)) +
+	theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave('out/streaks.png', width=10)
