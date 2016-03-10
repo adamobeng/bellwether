@@ -20,8 +20,7 @@ for (el in elections.columns.list) {
 	results = raw.data[,list(State,Area, year=as.character(el$year))]
 	for (col in el$party.columns ) raw.data[get(col)>100, (col):=NA]
 	results$county.winning.party = el$party.names[max.col(raw.data[,el$party.columns, with=F])]
-	results[!(county.winning.party %in% c('DEM', 'REP')), county.winning.party:=NA]
-	results[!is.na(county.winning.party), county.winning.party:=substr(county.winning.party, 1, 1)]
+	results[(county.winning.party %in% c('DEM', 'REP')), county.winning.party:=substr(county.winning.party, 1, 1)]
 	full.results <- rbind(full.results, results)
 }
 
